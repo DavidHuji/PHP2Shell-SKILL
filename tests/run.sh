@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run the scanner against the fixtures and compare with the expected verdicts.
 set -u
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 S=skills/php2shell/php2shell.sh
 fail=0
 

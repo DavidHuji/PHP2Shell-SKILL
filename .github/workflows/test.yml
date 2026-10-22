@@ -4,7 +4,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: shellcheck -S warning skills/php2shell/php2shell.sh install.sh tests/run.sh
       - run: bash tests/run.sh
       - name: Action works on a clean project
