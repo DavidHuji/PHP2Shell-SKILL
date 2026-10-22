@@ -10,6 +10,7 @@
 set -u
 
 FIXED="8.2.35 8.3.36 8.4.27 8.5.12"
+SELF=$0; [ -f "$SELF" ] || SELF=php2shell.sh   # "bash" when piped from curl
 
 if [ -t 1 ]; then R=$'\e[31m'; G=$'\e[32m'; Y=$'\e[33m'; B=$'\e[1m'; N=$'\e[0m'; else R='' G='' Y='' B='' N=''; fi
 # In GitHub Actions, findings in project files also become inline annotations.
@@ -121,7 +122,7 @@ cmd_check() {
   [ "$machine" = 1 ] && scan_machine
   echo
   if [ "$FOUND_BAD" = 1 ]; then
-    echo "${R}${B}Action needed.${N} Bump the versions above. If a server can't be patched today: $0 mitigate"
+    echo "${R}${B}Action needed.${N} Bump the versions above. If a server can't be patched today: $SELF mitigate"
     exit 1
   fi
   echo "${G}${B}No vulnerable PHP found.${N} After upgrading a server, restart PHP-FPM / Apache."
@@ -151,7 +152,7 @@ session.use_strict_mode = 1'
     else echo "  would write $d/$name"; fi
   done
   echo
-  if [ "$apply" = 1 ]; then echo "Done. Restart PHP-FPM / Apache, then run: $0 check"
+  if [ "$apply" = 1 ]; then echo "Done. Restart PHP-FPM / Apache, then run: $SELF check"
   else echo "Dry run. Re-run with --apply (usually with sudo) to write."; fi
 }
 
