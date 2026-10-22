@@ -14,7 +14,7 @@ curl -fsSL "$REPO/archive/refs/heads/main.tar.gz" | tar -xz -C "$tmp"
 
 mkdir -p "$(dirname "$dest")"
 rm -rf "$dest"
-cp -R "$tmp"/PHP2Shell-SKILL-main/php2shell "$dest"
+cp -R "$tmp"/PHP2Shell-SKILL-main/skills/php2shell "$dest"
 chmod +x "$dest/php2shell.sh"
 
 echo "✔ Installed to $dest"

@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
+# Word splitting of file / binary lists is intentional.
+# shellcheck disable=SC2046,SC2086
 # php2shell - check, mitigate and hunt for PHP2Shell (CVE-2026-109618 / CVE-2026-109619).
 #
 #   php2shell.sh check [dir]       scan a project + this machine (read-only, default)
+#                  --project-only  skip local PHP / Docker (use this in CI)
 #   php2shell.sh mitigate [--apply] write the server ini drop-in (dry run by default)
 #   php2shell.sh hunt              look for signs of exploitation (read-only)
 set -u
 
 FIXED="8.2.35 8.3.36 8.4.27 8.5.12"
 
-if [ -t 1 ]; then R=$'\e[31m'; G=$'\e[32m'; Y=$'\e[33m'; B=$'\e[1m'; N=$'\e[0m'; else R= G= Y= B= N=; fi
+if [ -t 1 ]; then R=$'\e[31m'; G=$'\e[32m'; Y=$'\e[33m'; B=$'\e[1m'; N=$'\e[0m'; else R='' G='' Y='' B='' N=''; fi
+# In GitHub Actions, findings in project files also become inline annotations.
+annotate() {
+  [ "${GITHUB_ACTIONS:-}" = true ] && [ -n "${CUR_FILE:-}" ] || return 0
+  local line
+  line=$(grep -n -F "${CUR_VER:-}" "$CUR_FILE" 2>/dev/null | head -n1 | cut -d: -f1)
+  echo "::$1 file=${CUR_FILE#./},line=${line:-1},title=PHP2Shell::$2"
+}
 ok()   { echo "  ${G}✔${N} $*"; }
-bad()  { echo "  ${R}✘${N} $*"; FOUND_BAD=1; }
-warn() { echo "  ${Y}!${N} $*"; }
+bad()  { echo "  ${R}✘${N} $*"; FOUND_BAD=1; annotate error "$*"; }
+warn() { echo "  ${Y}!${N} $*"; annotate warning "$*"; }
 head_() { echo; echo "${B}$*${N}"; }
 FOUND_BAD=0
 
@@ -67,8 +77,9 @@ scan_project() {
       *composer.json)
         vers=$(tr -d '\n' < "$f" | sed -nE 's/.*"platform"[[:space:]]*:[[:space:]]*\{[^}]*"php"[[:space:]]*:[[:space:]]*"([0-9][0-9.]*)".*/\1/p') ;;
     esac
-    for v in $vers; do judge "${v%.}" "$rel"; hits=1; done
+    for v in $vers; do CUR_FILE=$f CUR_VER=${v%.}; judge "${v%.}" "$rel"; hits=1; done
   done
+  CUR_FILE=
   [ "$hits" = 0 ] && echo "  (no pinned PHP versions found in project files)"
 }
 
@@ -102,8 +113,12 @@ scan_machine() {
 
 cmd_check() {
   echo "${B}PHP2Shell check${N} (CVE-2026-109618 / CVE-2026-109619). Fixed in: $FIXED"
-  scan_project "${1:-.}"
-  scan_machine
+  local dir=. machine=1 a
+  for a in "$@"; do
+    case "$a" in --project-only) machine=0 ;; *) dir=$a ;; esac
+  done
+  scan_project "$dir"
+  [ "$machine" = 1 ] && scan_machine
   echo
   if [ "$FOUND_BAD" = 1 ]; then
     echo "${R}${B}Action needed.${N} Bump the versions above. If a server can't be patched today: $0 mitigate"
@@ -176,6 +191,6 @@ case "${1:-check}" in
   check)    shift 2>/dev/null; cmd_check "$@" ;;
   mitigate) shift; cmd_mitigate "$@" ;;
   hunt)     cmd_hunt ;;
-  -h|--help|help) sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//' ;;
+  -h|--help|help) sed -n '4,9p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo "unknown command: $1 (try: check, mitigate, hunt)"; exit 2 ;;
 esac

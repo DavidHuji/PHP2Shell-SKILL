@@ -1,0 +1,11 @@
+{
+  "name": "php2shell",
+  "owner": { "name": "DavidHuji" },
+  "plugins": [
+    {
+      "name": "php2shell",
+      "source": "./",
+      "description": "Find and fix PHP2Shell (CVE-2026-109618 / CVE-2026-109619) in your PHP project, CI and servers."
+    }
+  ]
+}

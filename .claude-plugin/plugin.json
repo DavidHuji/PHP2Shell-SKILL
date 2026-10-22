@@ -1,0 +1,10 @@
+{
+  "name": "php2shell",
+  "description": "Find and fix PHP2Shell (CVE-2026-109618 / CVE-2026-109619) in your PHP project, CI and servers.",
+  "version": "1.0.0",
+  "author": { "name": "DavidHuji" },
+  "homepage": "https://github.com/DavidHuji/PHP2Shell-SKILL",
+  "repository": "https://github.com/DavidHuji/PHP2Shell-SKILL",
+  "license": "MIT",
+  "keywords": ["php", "security", "cve-2026-109618", "cve-2026-109619", "php2shell"]
+}

@@ -1,0 +1,15 @@
+name: PHP2Shell Check
+description: Fail the build if any Dockerfile, compose file, CI config or version file pins a PHP version vulnerable to PHP2Shell (CVE-2026-109618 / CVE-2026-109619).
+author: DavidHuji
+branding:
+  icon: shield
+  color: red
+inputs:
+  path:
+    description: Project directory to scan
+    default: .
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: bash "$GITHUB_ACTION_PATH/skills/php2shell/php2shell.sh" check --project-only "${{ inputs.path }}"
